@@ -1,57 +1,97 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import axios from "axios";
 import EditEmployee from "./components/Modals/EditEmployee";
 import AddEmployee from "./components/Modals/AddEmployee";
 
 const EmployeeList = () => {
   const [employeeData, setEmployeeData] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentEmployeeId, setCurrentEmployeeId] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8000/api/employees");
+      setEmployeeData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+    setIsAddModalOpen(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/api/employees");
-        setEmployeeData(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-      }
-    };
     fetchData();
   }, []);
 
-  const handleCheck = (id) => {
-    // handle check logic
-    setIsModalOpen(true);
+  const handleCloseModal = (id) => {
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
   };
 
-  const editEmployee = (id) => {
-    // edit employee logic
+  const editEmployeeModal = (id) => {
+    setCurrentEmployeeId(id);
+    setIsEditModalOpen(true);
   };
 
-  const deleteEmployee = (id) => {
-    // delete employee logic
+  const deleteEmployee = async (id) => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/employees/${id}`);
+
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = (id) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this employee? It can't be undone."
+    );
+    if (isConfirmed) {
+      deleteEmployee(id);
+      console.log("Item deleted.");
+    } else {
+      console.log("Delete canceled.");
+    }
   };
 
   if (loading) {
-    return <p>Loading employee data...</p>;
+    return (
+      <div className="flex items-center justify-center">
+        <div
+          class="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full"
+          role="status"
+          aria-label="loading"
+        >
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
     <>
-      {isModalOpen && <AddEmployee />}
+      {isAddModalOpen && (
+        <AddEmployee onSubmit={fetchData} closeModal={handleCloseModal} />
+      )}
+      {isEditModalOpen && (
+        <EditEmployee
+          employeeId={currentEmployeeId}
+          onSubmit={fetchData}
+          closeModal={handleCloseModal}
+        />
+      )}
 
-      {/* <EditEmployee/> */}
-      <main className="px-[100px]">
+      <main className="px-[100px] pt-[30px]">
         <div className="flex justify-between items-center mt-2 px-8">
           <h2 className="text-2xl font-bold">Employee List</h2>
           <button
             type="button"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md"
-            onClick={handleCheck}
+            onClick={() => setIsAddModalOpen(true)}
           >
             Create Employee
           </button>
@@ -69,11 +109,15 @@ const EmployeeList = () => {
           </thead>
           <tbody>
             {console.log(employeeData)}
-            {employeeData.map(({ name, profile, email, status }, i) => (
+            {employeeData.map(({ name, profile, email, status, id }, i) => (
               <tr key={i} className="odd:bg-white even:bg-gray-100">
                 <td className="px-6 py-4">
                   <img
-                    src={`https://i.pravatar.cc/150?u=${email}`}
+                    src={`${
+                      profile
+                        ? `http://127.0.0.1:8000/storage/${profile}`
+                        : `https://i.pravatar.cc/150?u=${email}`
+                    }`}
                     className="w-10 h-10 rounded-full"
                     alt="User avatar"
                   />
@@ -82,11 +126,11 @@ const EmployeeList = () => {
                 <td className="px-6 py-4">{email}</td>
                 <td className="px-6 py-4">
                   {status === "active" ? (
-                    <span className="badge bg-green-500 text-white">
+                    <span className="badge bg-green-500 text-white px-2 py-1 rounded-md">
                       Active
                     </span>
                   ) : (
-                    <span className="badge bg-red-500 text-white">
+                    <span className="badge bg-red-500 text-white px-2 py-1 rounded-md">
                       Inactive
                     </span>
                   )}
@@ -94,13 +138,13 @@ const EmployeeList = () => {
                 <td className="px-6 py-4">
                   <button
                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-md mr-2"
-                    onClick={() => editEmployee()}
+                    onClick={() => editEmployeeModal(id)}
                   >
                     Edit
                   </button>
                   <button
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-md"
-                    onClick={() => deleteEmployee()}
+                    onClick={() => handleDelete(id)}
                   >
                     Delete
                   </button>
