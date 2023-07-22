@@ -2,20 +2,26 @@
 import { useState } from "react";
 import axios from "axios";
 
-const AddEmployeeForm = () => {
+const AddEmployeeForm = ({onSubmit, closeModal}) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8000/api/employees", {
-        name,
-        email,
-        status,
-      });
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("status", status);
+      if (profileImage) formData.append("profile", profileImage);
+
+      const response = await axios.post(
+        "http://localhost:8000/api/employees",
+        formData
+      );
 
       console.log("Employee added successfully!", response.data);
     } catch (error) {
@@ -25,37 +31,46 @@ const AddEmployeeForm = () => {
     setName("");
     setEmail("");
     setStatus("");
+    setProfileImage(null);
+    onSubmit();
   };
+
   const handleInputChange = (event) => {
-    switch (event.target.id) {
+    const { id, value } = event.target;
+
+    switch (id) {
       case "name":
-        setName(event.target.value);
+        setName(value);
         break;
       case "email":
-        setEmail(event.target.value);
+        setEmail(value);
         break;
       case "status":
-        setStatus(event.target.value);
+        setStatus(value);
         break;
       default:
         break;
     }
   };
 
-  // Render the form
+  const handleProfileImageChange = (event) => {
+    const imageFile = event.target.files[0];
+    setProfileImage(imageFile);
+  };
+
   return (
     <form
       className="bg-[#1a1c1d96] h-screen w-full absolute top-0 z-[22] flex items-center justify-center"
       onSubmit={handleSubmit}
     >
       <div className="relative w-[399px] bg-white rounded-[7px] px-[64px] py-[34px]">
-        <div className="absolute top-[27px] right-[30px]" title="close">
-          <button type="button">
+        <div className="absolute top-[27px] right-[30px]" title="Close">
+          <button type="button" onClick={closeModal}>
             <img
               src="/images/close-icon-dark.svg"
               height={17}
               width={17}
-              alt="close"
+              alt="Close"
             />
           </button>
         </div>
@@ -123,11 +138,27 @@ const AddEmployeeForm = () => {
                     <option value="inactive">Inactive</option>
                   </select>
                 </div>
+              </li>
+              <li className="flex items-center gap-[15px]">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="profile-image"
+                    className="text-[#666666] text-[14px] font-semibold pb-[11px]"
+                  >
+                    Choose a profile image
+                  </label>
+                  <input
+                    type="file"
+                    className="input-box-shadow border border-[#D7D7D7] rounded-[5px] h-[38px] px-[8px]"
+                    id="profile-image"
+                    onChange={handleProfileImageChange}
+                  />
+                </div>
               </li>{" "}
             </ul>
           </div>
           <div className="mt-[50px] flex gap-4">
-            <button className="text-white text-[16px] font-semibold leading-[24px] bg-[#4D3AC1] w-full rounded-[4px] py-[7px] uppercase">
+            <button type="button" onClick={closeModal} className="text-[#6f6f6f] text-[16px] font-semibold leading-[24px] bg-[#bcbcbc] w-full rounded-[4px] py-[7px] uppercase">
               Cancel
             </button>
             <button
