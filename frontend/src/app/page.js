@@ -4,6 +4,8 @@ import axios from "axios";
 import EditEmployee from "./components/Modals/EditEmployee";
 import AddEmployee from "./components/Modals/AddEmployee";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const EmployeeList = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -13,7 +15,7 @@ const EmployeeList = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/employees");
+      const response = await axios.get(`${apiUrl}employees`);
       setEmployeeData(response.data);
       setLoading(false);
     } catch (error) {
@@ -38,7 +40,7 @@ const EmployeeList = () => {
 
   const deleteEmployee = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/employees/${id}`);
+      await axios.delete(`${apiUrl}employees/${id}`);
 
       fetchData();
     } catch (error) {

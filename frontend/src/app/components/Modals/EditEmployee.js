@@ -3,6 +3,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 const EditEmployee = ({ employeeId, onSubmit, closeModal }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -10,9 +12,7 @@ const EditEmployee = ({ employeeId, onSubmit, closeModal }) => {
 
   const fetchEmployeeById = async (id) => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/api/employees/${id}`
-      );
+      const response = await axios.get(`${apiUrl}employees/${id}`);
       const { name, email, status } = response.data;
       setName(name);
       setEmail(email);
@@ -46,7 +46,7 @@ const EditEmployee = ({ employeeId, onSubmit, closeModal }) => {
       };
 
       const response = await axios.put(
-        `http://127.0.0.1:8000/api/employees/${employeeId}`,
+        `${apiUrl}employees/${employeeId}`,
         updatedEmployee
       );
 

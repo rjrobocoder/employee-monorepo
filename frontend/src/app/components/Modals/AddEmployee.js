@@ -2,7 +2,9 @@
 import { useState } from "react";
 import axios from "axios";
 
-const AddEmployeeForm = ({onSubmit, closeModal}) => {
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+const AddEmployeeForm = ({ onSubmit, closeModal }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
@@ -18,10 +20,7 @@ const AddEmployeeForm = ({onSubmit, closeModal}) => {
       formData.append("status", status);
       if (profileImage) formData.append("profile", profileImage);
 
-      const response = await axios.post(
-        "http://localhost:8000/api/employees",
-        formData
-      );
+      const response = await axios.post(`${apiUrl}employees`, formData);
 
       console.log("Employee added successfully!", response.data);
     } catch (error) {
@@ -158,7 +157,11 @@ const AddEmployeeForm = ({onSubmit, closeModal}) => {
             </ul>
           </div>
           <div className="mt-[50px] flex gap-4">
-            <button type="button" onClick={closeModal} className="text-[#6f6f6f] text-[16px] font-semibold leading-[24px] bg-[#bcbcbc] w-full rounded-[4px] py-[7px] uppercase">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="text-[#6f6f6f] text-[16px] font-semibold leading-[24px] bg-[#bcbcbc] w-full rounded-[4px] py-[7px] uppercase"
+            >
               Cancel
             </button>
             <button
