@@ -32,7 +32,7 @@ class EmployeeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'profile' => 'image|max:2048',
+            'profile' => 'sometimes|image|max:2048',
             'email' => 'required|email|unique:employees,email',
             'status' => 'required|in:active,inactive',
         ]);
